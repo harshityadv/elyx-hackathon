@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Elyx Healthcare Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="dashboard-container">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="nav-brand">
+                <h2>Elyx Healthcare</h2>
+            </div>
+            <div class="nav-tabs">
+                <a href="/" class="nav-tab {% if request.endpoint == 'main.dashboard' %}active{% endif %}">Overview</a>
+                <a href="/timeline" class="nav-tab {% if request.endpoint == 'main.timeline_page' %}active{% endif %}">Timeline</a>
+                <a href="/conversations" class="nav-tab {% if request.endpoint == 'main.conversations_page' %}active{% endif %}">Conversations</a>
+                <a href="/decisions" class="nav-tab {% if request.endpoint == 'main.decisions_page' %}active{% endif %}">Decisions</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Modal for episode details -->
+        <div class="modal hidden" id="episodeModal">
+            <div class="modal-overlay" id="modalOverlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle"></h3>
+                    <button class="modal-close" id="modalClose">&times;</button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

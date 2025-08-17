@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Decisions - Elyx Healthcare{% endblock %}
+
+{% block content %}
+<div class="decisions-container">
+    <div class="decisions-header">
+        <h3>Decision Tracking</h3>
+        <p class="decisions-subtitle">Evidence-based decisions made throughout the journey</p>
+    </div>
+    <div class="decisions-content">
+        <div class="decisions-list" id="decisionsList">
+            <!-- Decisions will be loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadDecisions();
+});
+
+function loadDecisions() {
+    fetch('/api/decisions')
+        .then(response => response.json())
+        .then(decisions => {
+            renderDecisions(decisions);
+        })
+        .catch(error => {
+            console.error('Error loading decisions:', error);
+        });
+}
+
+function renderDecisions(decisions) {
+    const container = document.getElementById('decisionsList');
+    container.innerHTML = '';
+
+    decisions.forEach(decision => {
+        const decisionCard = document.createElement('div');
+        decisionCard.className = 'decision-card';
+
+        decisionCard.innerHTML = `
+            <div class="decision-header">
+                <div>
+                    <div class="decision-title">${decision.decision}</div>
+                    <div class="decision-date">${formatDate(decision.date)}</div>
+                </div>
+                <div class="decision-type">${decision.type}</div>
+            </div>
+            <div class="decision-reason">"${decision.reason}"</div>
+            <div class="decision-evidence">
+                <strong>Evidence:</strong> ${decision.evidence}
+            </div>
+            <div class="decision-outcome">
+                <strong>Outcome:</strong> ${decision.outcome}
+            </div>
+        `;
+
+        container.appendChild(decisionCard);
+    });
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+</script>
+{% endblock %}

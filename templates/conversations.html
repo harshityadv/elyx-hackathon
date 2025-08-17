@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Conversations - Elyx Healthcare{% endblock %}
+
+{% block content %}
+<div class="conversation-container">
+    <div class="conversation-header">
+        <h3>Team Conversations</h3>
+        <div class="conversation-search">
+            <input type="text" class="form-control" id="conversationSearch" placeholder="Search conversations...">
+        </div>
+    </div>
+    <div class="conversation-content">
+        <div class="messages-container" id="messagesContainer">
+            <!-- Messages will be loaded here via JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadConversations();
+});
+
+function loadConversations() {
+    fetch('/api/conversations')
+        .then(response => response.json())
+        .then(conversations => {
+            renderConversations(conversations);
+        })
+        .catch(error => {
+            console.error('Error loading conversations:', error);
+        });
+}
+
+function renderConversations(conversations) {
+    const container = document.getElementById('messagesContainer');
+    container.innerHTML = '';
+
+    conversations.forEach(conversation => {
+        const message = document.createElement('div');
+        message.className = `message ${conversation.sender === 'Rohan' ? 'user' : ''}`;
+
+        const initials = conversation.sender.split(' ').map(n => n[0]).join('');
+        const timestamp = new Date(conversation.timestamp);
+        const timeString = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+        message.innerHTML = `
+            <div class="message-header">
+                <div class="message-avatar">${initials}</div>
+                <div class="message-sender">${conversation.sender}</div>
+                <div class="message-time">${timeString}</div>
+            </div>
+            <div class="message-content">${conversation.message}</div>
+        `;
+
+        container.appendChild(message);
+    });
+}
+
+// Search functionality
+document.getElementById('conversationSearch').addEventListener('input', function(e) {
+    const query = e.target.value;
+    fetch(`/api/search-conversations?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(conversations => {
+            renderConversations(conversations);
+        });
+});
+</script>
+{% endblock %}

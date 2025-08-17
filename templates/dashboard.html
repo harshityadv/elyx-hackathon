@@ -1,0 +1,145 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Elyx Healthcare{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Elyx Healthcare Dashboard</h1>
+        <p class="dashboard-subtitle">Comprehensive health journey visualization and management</p>
+    </div>
+
+    <!-- Member Profile Section -->
+    <div class="analytics-grid">
+        <!-- Member Profile Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Member Profile</h3>
+            </div>
+            <div class="member-profile">
+                <div class="profile-header">
+                    <div class="avatar-circle">
+                        {{ member.preferred_name[0] if member.preferred_name else 'R' }}
+                    </div>
+                    <div class="profile-details">
+                        <h4>{{ member.preferred_name or member.name or 'Rohan Patel' }}</h4>
+                        <div class="member-subtitle">{{ member.occupation }} • {{ member.location }}</div>
+                        <div class="member-stats">
+                            <span>Age: {{ member.age }}</span>
+                            <span>Gender: {{ member.gender }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="health-goals">
+                    <h5>Health Goals</h5>
+                    <ul>
+                        {% if member.health_goals %}
+                            {% for goal in member.health_goals %}
+                                <li>{{ goal }}</li>
+                            {% endfor %}
+                        {% else %}
+                            <li>🫀 Reduce heart disease risk by Dec 2026</li>
+                            <li>🧠 Enhance cognitive function by Jun 2026</li>
+                            <li>🔬 Annual health screenings starting Nov 2025</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="condition-tags">
+                    {% if member.chronic_conditions %}
+                        {% for condition in member.chronic_conditions %}
+                            <span class="condition-tag">{{ condition }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="condition-tag">POTS/Long COVID</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Program Overview</h3>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalDays">240</div>
+                    <div class="stat-label">Days in Program</div>
+                </div>
+                <div class="stat-item" style="background-color: var(--color-bg-3);">
+                    <div class="stat-value" id="breakthroughs">2</div>
+                    <div class="stat-label">Breakthroughs</div>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item" style="background-color: var(--color-bg-4);">
+                    <div class="stat-value" id="totalEvents">8</div>
+                    <div class="stat-label">Major Events</div>
+                </div>
+                <div class="stat-item" style="background-color: var(--color-bg-5);">
+                    <div class="stat-value" id="teamMembers">6</div>
+                    <div class="stat-label">Team Members</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Activity Section -->
+    <div class="analytics-grid">
+        <!-- Health Metrics Chart -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Health Metrics Trends</h3>
+                <p class="card-subtitle">HRV and Recovery Score progression over time</p>
+            </div>
+            <div class="chart-container">
+                <canvas id="healthMetricsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Recent Activity</h3>
+                <p class="card-subtitle">Latest timeline events and interactions</p>
+            </div>
+            <div id="recentActivity" class="activity-list">
+                <!-- Activity items will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Generation Section -->
+    <div class="card" style="margin-top: var(--space-32);">
+        <div class="card-header">
+            <h3>🤖 AI Conversation Generation</h3>
+            <p class="card-subtitle">Generate new conversations using Ollama AI based on Rohan's profile and health journey</p>
+        </div>
+        <div style="padding: var(--space-20);">
+            <button id="generateConversationsBtn" class="btn btn--primary">
+                Generate Conversations
+            </button>
+            <div id="generationStatus" style="margin-top: var(--space-16);">
+                <!-- Generation status will appear here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Episode Details -->
+<div id="episodeModal" class="modal hidden">
+    <div id="modalOverlay" class="modal-overlay"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Episode Details</h3>
+            <button id="modalClose" class="modal-close">&times;</button>
+        </div>
+        <div id="modalBody" class="modal-body">
+            <!-- Episode details will be loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}

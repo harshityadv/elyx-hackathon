@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Timeline - Elyx Healthcare{% endblock %}
+
+{% block content %}
+<div class="timeline-container">
+    <div class="timeline-header">
+        <h3>8-Month Member Journey</h3>
+        <div class="timeline-filters">
+            <select class="form-control" id="categoryFilter">
+                <option value="all">All Categories</option>
+                <option value="onboarding">Onboarding</option>
+                <option value="medical">Medical</option>
+                <option value="exercise">Exercise</option>
+                <option value="nutrition">Nutrition</option>
+                <option value="lifestyle">Lifestyle</option>
+                <option value="breakthrough">Breakthrough</option>
+                <option value="feedback">Feedback</option>
+                <option value="planning">Planning</option>
+            </select>
+        </div>
+    </div>
+    <div class="timeline-content">
+        <div class="timeline" id="timelineEvents">
+            <!-- Timeline events will be loaded here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadTimeline();
+});
+
+function loadTimeline() {
+    fetch('/api/timeline')
+        .then(response => response.json())
+        .then(events => {
+            renderTimeline(events);
+        })
+        .catch(error => {
+            console.error('Error loading timeline:', error);
+        });
+}
+
+function renderTimeline(events) {
+    const container = document.getElementById('timelineEvents');
+    container.innerHTML = '';
+
+    events.forEach(event => {
+        const timelineEvent = document.createElement('div');
+        timelineEvent.className = `timeline-event ${event.category}`;
+
+        timelineEvent.innerHTML = `
+            <div class="timeline-card">
+                <div class="timeline-date">${formatDate(event.date)}</div>
+                <div class="timeline-title">${event.title}</div>
+                <div class="timeline-description">${event.description}</div>
+                <div class="timeline-meta">
+                    <span><strong>Team:</strong> ${event.team_members.join(', ')}</span>
+                    <span><strong>Response:</strong> ${event.response_time}</span>
+                </div>
+            </div>
+        `;
+
+        timelineEvent.addEventListener('click', () => {
+            showEventModal(event);
+        });
+
+        container.appendChild(timelineEvent);
+    });
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
+function showEventModal(event) {
+    document.getElementById('modalTitle').textContent = event.title;
+    document.getElementById('modalBody').innerHTML = `
+        <div style="margin-bottom: 16px;">
+            <strong>Date:</strong> ${formatDate(event.date)}
+        </div>
+        <div style="margin-bottom: 16px;">
+            <strong>Category:</strong> ${event.category.charAt(0).toUpperCase() + event.category.slice(1)}
+        </div>
+        <div style="margin-bottom: 16px;">
+            <strong>Description:</strong><br>
+            ${event.description}
+        </div>
+        <div style="margin-bottom: 16px;">
+            <strong>Outcome:</strong><br>
+            ${event.outcome}
+        </div>
+        <div style="margin-bottom: 16px;">
+            <strong>Team Members:</strong> ${event.team_members.join(', ')}
+        </div>
+        <div style="margin-bottom: 16px;">
+            <strong>Response Time:</strong> ${event.response_time}
+        </div>
+        <div style="margin-bottom: 16px;">
+            <strong>Time to Resolution:</strong> ${event.time_to_resolution}
+        </div>
+        ${event.friction_points ? `
+            <div style="margin-bottom: 16px;">
+                <strong>Friction Points:</strong><br>
+                ${event.friction_points}
+            </div>
+        ` : ''}
+    `;
+    document.getElementById('episodeModal').classList.remove('hidden');
+}
+
+// Filter functionality
+document.getElementById('categoryFilter').addEventListener('change', function(e) {
+    const category = e.target.value;
+    fetch(`/api/filter-timeline?category=${category}`)
+        .then(response => response.json())
+        .then(events => {
+            renderTimeline(events);
+        });
+});
+
+// Modal close functionality
+document.getElementById('modalClose').addEventListener('click', () => {
+    document.getElementById('episodeModal').classList.add('hidden');
+});
+
+document.getElementById('modalOverlay').addEventListener('click', () => {
+    document.getElementById('episodeModal').classList.add('hidden');
+});
+</script>
+{% endblock %}
